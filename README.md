@@ -1,7 +1,7 @@
 # Zenith: Pwn2Own TP-Link AC1750 Smart Wi-Fi Router Remote Code Execution Vulnerability
 Zenith is an exploit I wrote to compromise the [TP-Link AC1750 Smart Wi-Fi Router](https://www.tp-link.com/us/home-networking/wifi-router/archer-c7/) which was part of the **Routers** / **LAN** category in the [Pwn2Own Austin 2021](https://www.zerodayinitiative.com/blog/2021/8/11/pwn2own-austin-2021-phones-printers-nas-and-more) contest.
 
-It exploits an integer overflow that results in a heap-buffer overflow in a `kmalloc-128` slab cache in the NetUSB driver which is authored by the [KCodes](https://www.kcodes.com/product/1/36) company. The driver listens on the `br-lan` interface on TCP port 20005 and parses attacker controlled data. It has been tested against the [Archer C7(US)_V5_210519](https://static.tp-link.com/upload/firmware/2021/202108/20210820/Archer%20C7(US)_V5_210519.zip) firmware that was published the August 20 2021 (you can find the [NetUSB.ko](bin/NetUSB.ko) binary file in this repository as well).
+It exploits an integer overflow that results in a heap-buffer overflow in a `kmalloc-128` slab cache in the NetUSB driver which is authored by the [KCodes](https://www.kcodes.com/product/1/36) company. The driver listens on the `br-lan` interface on TCP port 20005 and parses attacker controlled data. It has been tested against the [Archer C7(US)_V5_210519](https://static.tp-link.com/upload/firmware/2021/202108/20210820/Archer%20C7(US)_V5_210519.zip) firmware that was published on August 20 2021 (you can find the [NetUSB.ko](bin/NetUSB.ko) binary file in this repository as well).
 
 ![zenith](pics/zenith.gif)
 
@@ -115,7 +115,7 @@ $1 = {lock = {{rlock = {raw_lock = {<No data fields>}}}}, task_list = {next = 0x
 #15 0x8010198c in ret_from_exception () at arch/mips/kernel/entry.S:34
 ```
 
-All of this is possible because there is no kernel-ALSR and the heap is writable / executable (no NX).
+All of this is possible because there is no kernel ALSR and the heap is writable / executable (no NX).
 
 Zenith also leverages NetUSB's debug interface which is another socket listening on the port 33344. It basically sends `printk` string over this socket and leaks kernel-mode pointers of various allocations where we are able to place controlled data at. This is used by the `Leaker` class in the exploit code.
 
@@ -174,7 +174,9 @@ $ python3 zenith-poc.py --target 192.168.127.1
 
 If your device is vulnerable, the lights should stay on for a few seconds after the script is done then turn off and the router should automatically reboot. Pay attention, because it can be a bit subtle to see :)
 
-![zenith](pics/zenith-blink.gif)
+<p align='center'>
+<img src='pics/zenith-blink.gif'>
+</p>
 
 ### Running Zenith
 **Disclaimer: The exploit isn't reliable and that's it unfortunately failed to land during the contest 😅**
